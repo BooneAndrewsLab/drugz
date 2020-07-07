@@ -298,6 +298,7 @@ def get_args():
     parser.add_argument("-r", dest="remove_genes", metavar="remove genes", help="genes to remove, comma delimited")
     parser.add_argument("-p", dest="pseudocount", type=int, metavar="pseudocount", help="pseudocount (default=5)",
                         default=5)
+    parser.add_argument("-d", dest="drop_columns", metavar="drop columns", help="Comma sparated names of columns to drop")
     parser.add_argument("-I", dest="index_column", type=int,
                         help="Index column in the input file (default=0; GENE_CLONE column)", default=0)
     parser.add_argument("--minobs", dest="minObs", type=int, metavar="minObs", help="min number of obs (default=1)",
@@ -404,9 +405,11 @@ def drugZ_analysis(args):
 
     
     log_.info("Loading the read count matrix")
-    reads = load_reads(filepath=args.infile, index_column=0, genes_to_remove=remove_genes)
+    reads = load_reads(filepath=args.infile, index_column=args.index_column, genes_to_remove=remove_genes)
     no_of_guides = reads.shape[0]
 
+    if args.drop_columns:
+        reads = reads.drop(columns=args.drop_columns.split(','))
 
     normalized_counts = normalize_readcounts(reads=reads, control=control_samples,treatment=treatment_samples )
     log_.info("Normalizing read counts")
